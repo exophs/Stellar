@@ -36,7 +36,7 @@ A real-time Discord status page that displays your online presence, custom statu
    const DISCORD_USER_ID = "YOUR_DISCORD_ID_HERE";
    ```
 
-4. Customize the music playlist (lines 345-370 in `index.html`).
+4. Customize the music playlist (lines 315-344 in `index.html`).
 
 5. Deploy to any static hosting service (GitHub Pages, Vercel, Netlify, etc.).
 
