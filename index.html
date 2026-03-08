@@ -5,715 +5,980 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Stellar</title>
   <link rel="icon" type="image/x-icon" href="https://cdn.glitch.global/58cc88e6-fae4-4d3a-9fee-87a8518eb0a0/exophsOS%2Ffavicon.png?v=1741142850948" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
-    /* Base styles */
+    :root {
+      --bg: #0a0b0f;
+      --surface: rgba(255,255,255,0.04);
+      --surface-hover: rgba(255,255,255,0.07);
+      --border: rgba(255,255,255,0.08);
+      --border-light: rgba(255,255,255,0.14);
+      --text: #e8e9ef;
+      --text-muted: #6b6f7e;
+      --text-dim: #9a9db0;
+      --accent: #7c6af7;
+      --accent-soft: rgba(124,106,247,0.15);
+      --green: #3ecf8e;
+      --yellow: #e8c547;
+      --red: #f16060;
+      --spotify: #1db954;
+      --online: #3ecf8e;
+      --idle: #e8c547;
+      --dnd: #f16060;
+      --offline: #4a4d5a;
+      --radius: 14px;
+      --radius-sm: 8px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-      display: flex;
-      justify-content: center;
-      align-items: center;
       min-height: 100vh;
-      background: radial-gradient(ellipse at bottom, #1a0a2a 0%, #0d0615 100%);
-      overflow: hidden;
-      margin: 0;
-      font-family: Arial, sans-serif;
-      color: #ffffff;
+      background: var(--bg);
+      font-family: 'Syne', sans-serif;
+      color: var(--text);
+      overflow-x: hidden;
       position: relative;
-      transition: background 0.5s ease;
     }
-    
-    /* Stars animation */
-    .stars {
+
+    canvas#bg {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 150%;
-      transform: rotate(-45deg);
+      inset: 0;
       z-index: 0;
-      transition: opacity 0.5s ease;
+      opacity: 0.45;
+      pointer-events: none;
     }
-    
-    .star {
-      --star-color: #b388ff;
-      --star-tail-length: 6em;
-      --star-tail-height: 2px;
-      --star-width: calc(var(--star-tail-length) / 6);
-      --fall-duration: 12s;
-      --tail-fade-duration: var(--fall-duration);
-      position: absolute;
-      top: var(--top-offset);
-      left: 0;
-      width: var(--star-tail-length);
-      height: var(--star-tail-height);
-      color: var(--star-color);
-      background: linear-gradient(45deg, currentColor, transparent);
-      border-radius: 50%;
-      filter: drop-shadow(0 0 6px currentColor);
-      transform: translate3d(104em, 0, 0);
-      animation: fall var(--fall-duration) var(--fall-delay) linear infinite,
-                 tail-fade var(--tail-fade-duration) var(--fall-delay) ease-out infinite;
-    }
-    
-    .star::before, .star::after {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: calc(var(--star-width) / -2);
-      width: var(--star-width);
-      height: 100%;
-      background: linear-gradient(45deg, transparent, currentColor, transparent);
-      border-radius: inherit;
-      animation: blink 2s linear infinite;
-    }
-    
-    .star::before { transform: rotate(45deg); }
-    .star::after { transform: rotate(-45deg); }
-    
-    @keyframes fall {
-      to { transform: translate3d(-30em, 0, 0); }
-    }
-    
-    @keyframes tail-fade {
-      0%, 50% { width: var(--star-tail-length); opacity: 1; }
-      70%, 80% { width: 0; opacity: 0.4; }
-      100% { width: 0; opacity: 0; }
-    }
-    
-    @keyframes blink {
-      50% { opacity: 0.6; }
-    }
-    
-    /* Main container */
-    .container {
-      display: flex;
-      gap: 20px;
-      background-color: rgba(44, 22, 55, 0);
-      padding: 20px;
-      border-radius: 10px;
+
+    .page {
+      position: relative;
       z-index: 1;
-      backdrop-filter: blur(20px) saturate(180%);
-      border: 1px solid rgba(178, 136, 255, 0.2);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      gap: 16px;
     }
-    
-    /* Status box */
-    .status-box {
-      flex: 1;
-      background-color: rgba(0, 0, 0, 0.1);
-      padding: 20px;
-      border-radius: 10px;
-      text-align: center;
-      min-width: 250px;
-      backdrop-filter: blur(10px);
-      user-select: none;
+
+    .wordmark {
+      font-size: 11px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-family: 'DM Mono', monospace;
+      font-weight: 300;
+      margin-bottom: 4px;
     }
-    
-    .profile-picture {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      margin-bottom: 10px;
-    }
-    
-    .album-cover {
-      width: 80px;
-      height: 80px;
-      border-radius: 10px;
-      margin-bottom: 10px;
-    }
-    
-    /* Progress bar */
-    .progress-bar {
+
+    .grid {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 12px;
       width: 100%;
-      height: 5px;
-      background-color: rgba(52, 58, 51);
-      border-radius: 5px;
-      margin-top: 10px;
+      max-width: 760px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      backdrop-filter: blur(24px) saturate(150%);
+      -webkit-backdrop-filter: blur(24px) saturate(150%);
+      overflow: hidden;
+      transition: border-color 0.25s ease;
+    }
+
+    .card:hover {
+      border-color: var(--border-light);
+    }
+
+    .card-inner {
+      padding: 20px;
+    }
+
+    .profile-card .card-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 12px;
+    }
+
+    .avatar-wrap {
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .avatar {
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      display: block;
+      background: var(--surface-hover);
+      border: 2px solid var(--border);
+    }
+
+    .status-dot {
+      position: absolute;
+      bottom: 2px;
+      right: 2px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 2.5px solid var(--bg);
+      background: var(--offline);
+      transition: background 0.3s ease;
+    }
+
+    .status-dot.online  { background: var(--online); }
+    .status-dot.idle    { background: var(--idle); }
+    .status-dot.dnd     { background: var(--dnd); }
+    .status-dot.offline { background: var(--offline); }
+
+    .name-block {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .display-name {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.2;
+    }
+
+    .username {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: 'DM Mono', monospace;
+    }
+
+    .custom-status {
+      font-size: 13px;
+      color: var(--text-dim);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .custom-status img {
+      height: 18px;
+      width: 18px;
+      object-fit: contain;
+    }
+
+    .platform-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .platform-chip {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-family: 'DM Mono', monospace;
+      color: var(--text-muted);
+      background: var(--surface-hover);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 4px 10px;
+      transition: color 0.2s, border-color 0.2s;
+    }
+
+    .platform-chip.active {
+      color: var(--accent);
+      border-color: rgba(124,106,247,0.35);
+    }
+
+    .platform-chip i { font-size: 10px; }
+
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .kv-block {
+      width: 100%;
+    }
+
+    .kv-label {
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-family: 'DM Mono', monospace;
+      margin-bottom: 8px;
+    }
+
+    .kv-pairs {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .kv-pair {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      font-family: 'DM Mono', monospace;
+      gap: 8px;
+    }
+
+    .kv-key { color: var(--text-muted); }
+    .kv-val { color: var(--text-dim); text-align: right; word-break: break-all; }
+
+    .right-col {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .section-label {
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-family: 'DM Mono', monospace;
+      margin-bottom: 12px;
+    }
+
+    .spotify-card .card-inner {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .spotify-top {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+
+    .album-art {
+      width: 68px;
+      height: 68px;
+      border-radius: var(--radius-sm);
+      object-fit: cover;
+      background: var(--surface-hover);
+      flex-shrink: 0;
+      border: 1px solid var(--border);
+    }
+
+    .spotify-meta {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .spotify-tag {
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--spotify);
+      font-family: 'DM Mono', monospace;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .spotify-tag i { font-size: 11px; }
+
+    .song-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-decoration: none;
+    }
+
+    .song-title:hover { color: var(--accent); }
+
+    .artist-name {
+      font-size: 12px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .album-name {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-style: italic;
+      font-family: 'DM Mono', monospace;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .progress-wrap {
+      margin-top: 14px;
+    }
+
+    .progress-times {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      font-family: 'DM Mono', monospace;
+      color: var(--text-muted);
+      margin-bottom: 5px;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 3px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
       overflow: hidden;
     }
-    
-    .progress-bar-inner {
+
+    .progress-fill {
       height: 100%;
-      background-color: #12c554;
-      border-radius: 5px;
+      background: var(--spotify);
+      border-radius: 3px;
+      width: 0%;
+      transition: width 1s linear;
     }
-    
-    .custom-status-emoji {
-      height: 20px;
-      vertical-align: middle;
-    }
-    
-    .activity {
-      margin-top: 10px;
-      font-size: 14px;
-    }
-    
-    /* Audio controls */
-    .sound-controls {
-      position: fixed;
-      top: 20px;
-      right: 20px;
+
+    .no-spotify {
       display: flex;
       align-items: center;
       gap: 10px;
-      z-index: 1000;
+      color: var(--text-muted);
+      font-size: 13px;
+      padding: 8px 0;
     }
-    
-    .sound-button {
-      background: rgba(44, 22, 55, 0.6);
-      border: none;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      color: white;
-      cursor: pointer;
+
+    .no-spotify i { font-size: 20px; color: var(--border-light); }
+
+    .activities-card .card-inner {
       display: flex;
-      align-items: center;
-      justify-content: center;
-      backdrop-filter: blur(10px);
+      flex-direction: column;
+      gap: 12px;
     }
-    
-    .sound-button:hover {
-      background: rgba(66, 33, 77, 0.8);
+
+    .activity-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      animation: fadeIn 0.3s ease;
     }
-    
-    .volume-slider-container {
-      width: 0;
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+    .activity-art-wrap {
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .activity-large-img {
+      width: 52px;
+      height: 52px;
+      border-radius: var(--radius-sm);
+      background: var(--surface-hover);
+      object-fit: cover;
+      border: 1px solid var(--border);
+    }
+
+    .activity-small-img {
+      position: absolute;
+      bottom: -4px;
+      right: -4px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid var(--bg);
+      background: var(--surface-hover);
+      object-fit: cover;
+    }
+
+    .activity-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .activity-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .activity-details, .activity-state {
+      font-size: 12px;
+      color: var(--text-muted);
+      white-space: nowrap;
       overflow: hidden;
-      transition: width 0.3s ease, opacity 0.3s ease;
-      opacity: 0;
+      text-overflow: ellipsis;
+      font-family: 'DM Mono', monospace;
     }
-    
-    .sound-controls:hover .volume-slider-container {
-      width: 100px;
-      opacity: 1;
+
+    .activity-elapsed {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: 'DM Mono', monospace;
+      margin-top: 3px;
     }
-    
-    .volume-slider {
-      width: 100%;
-      -webkit-appearance: none;
-      height: 5px;
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 5px;
-      outline: none;
+
+    .no-activity {
+      color: var(--text-muted);
+      font-size: 13px;
     }
-    
-    .volume-slider::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 15px;
-      height: 15px;
-      border-radius: 50%;
-      background: white;
-      cursor: pointer;
-    }
-    
-    .volume-slider::-moz-range-thumb {
-      width: 15px;
-      height: 15px;
-      border-radius: 50%;
-      background: white;
-      cursor: pointer;
-    }
-    
-    /* Now playing indicator */
-    .now-playing {
+
+    .music-bar {
       position: fixed;
       bottom: 20px;
-      left: 20px;
-      background: rgba(44, 22, 55, 0.6);
-      padding: 10px 15px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(10,11,15,0.85);
+      border: 1px solid var(--border);
+      border-radius: 50px;
+      backdrop-filter: blur(20px);
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 100;
+      font-size: 12px;
+      font-family: 'DM Mono', monospace;
+      color: var(--text-muted);
+      white-space: nowrap;
+      max-width: calc(100vw - 40px);
+      overflow: hidden;
+    }
+
+    .music-bar-track {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 260px;
+    }
+
+    .music-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .music-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px;
+      font-size: 13px;
+      line-height: 1;
+      transition: color 0.15s;
+      display: flex;
+      align-items: center;
+    }
+
+    .music-btn:hover { color: var(--text); }
+    .music-btn.active { color: var(--accent); }
+
+    .vol-slider {
+      width: 60px;
+      -webkit-appearance: none;
+      height: 3px;
+      background: var(--border-light);
+      border-radius: 3px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .vol-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--text);
+      cursor: pointer;
+    }
+
+    .conn-badge {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      font-size: 10px;
+      font-family: 'DM Mono', monospace;
+      color: var(--text-muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
       border-radius: 20px;
+      padding: 5px 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
       backdrop-filter: blur(10px);
-      font-size: 14px;
-      z-index: 1000;
-      display: none;
-      user-select: none;
+      z-index: 100;
+      transition: all 0.3s ease;
     }
-    
-    /* Utility classes */
-    .hidden {
-      display: none;
+
+    .conn-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--offline);
+      transition: background 0.3s;
     }
-    
-    #song-link {
-      color: inherit;
-      text-decoration: none;
-      transition: color 0.2s ease;
-    }
-    
-    #song-link:hover {
-      color: #b388ff;
-      text-decoration: underline;
-      text-decoration: none;
+
+    .conn-badge.connected .conn-dot { background: var(--green); }
+    .conn-badge.reconnecting .conn-dot { background: var(--yellow); animation: pulse 1s infinite; }
+
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+    @media (max-width: 620px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+      .profile-card .card-inner {
+        flex-direction: row;
+        text-align: left;
+        align-items: center;
+      }
+      .name-block, .custom-status, .platform-row, .kv-block {
+        align-items: flex-start;
+        justify-content: flex-start;
+      }
+      .custom-status { justify-content: flex-start; }
     }
   </style>
 </head>
 <body>
-  <!-- Audio Elements -->
-  <audio id="background-music"></audio>
-  
-  <!-- Audio Controls -->
-  <div class="sound-controls">
-    <div class="volume-slider-container">
-      <input type="range" class="volume-slider" id="volume-slider" min="0" max="1" step="0.01" value="0.5" />
-    </div>
-    <button class="sound-button" id="sound-button">
-      <i class="fas fa-volume-mute"></i>
-    </button>
-  </div>
-  
-  <!-- Now Playing Indicator -->
-  <div class="now-playing" id="now-playing">
-    Now Playing: <span id="now-playing-text">Loading...</span>
-  </div>
 
-  <!-- Stars Background -->
-  <div class="stars">
-    <script>
-      // Generate stars
-      for (let i = 0; i < 50; i++) {
-        const star = document.createElement("div");
-        star.classList.add("star");
-        star.style.setProperty("--top-offset", `${Math.random() * 150 - 25}vh`);
-        star.style.setProperty("--fall-duration", `${Math.random() * 10 + 5}s`);
-        star.style.setProperty("--fall-delay", `${Math.random() * 10}s`);
-        document.querySelector(".stars").appendChild(star);
-      }
-    </script>
-  </div>
+<canvas id="bg"></canvas>
 
-  <!-- Main Content -->
-  <div class="container">
-    <!-- Discord Status Box -->
-    <div class="status-box">
-      <img src="" alt="Profile Picture" class="profile-picture" id="profile-picture" />
-      <p id="display-name">Loading display name...</p>
-      <p id="username">Loading username...</p>
-      <p id="discord-status">Loading Discord status...</p>
-      <p id="custom-status">Loading custom status...</p>
-      <div id="activities"></div>
-    </div>
+<div class="conn-badge" id="conn-badge">
+  <div class="conn-dot"></div>
+  <span id="conn-text">connecting</span>
+</div>
 
-    <!-- Spotify Status Box -->
-    <div class="status-box" id="spotify-box">
-      <img src="" alt="Album Cover" class="album-cover" id="album-cover" />
-      <p id="song-name">
-        <a id="song-link" target="_blank" rel="noopener noreferrer">Loading song...</a>
-      </p>
-      <p id="artist-name">Loading artist...</p>
-      <div class="progress-bar" id="progress-bar">
-        <div class="progress-bar-inner" id="progress-bar-inner"></div>
+<div class="page">
+  <div class="wordmark">stellar / status</div>
+
+  <div class="grid">
+    <div class="card profile-card">
+      <div class="card-inner">
+        <div class="avatar-wrap">
+          <img id="avatar" class="avatar" src="" alt="" />
+          <div class="status-dot offline" id="status-dot"></div>
+        </div>
+
+        <div class="name-block">
+          <div class="display-name" id="display-name">—</div>
+          <div class="username" id="username">loading...</div>
+        </div>
+
+        <div class="custom-status" id="custom-status">
+          <span>no status</span>
+        </div>
+
+        <div class="platform-row">
+          <div class="platform-chip" id="platform-desktop">
+            <i class="fas fa-desktop"></i> desktop
+          </div>
+          <div class="platform-chip" id="platform-mobile">
+            <i class="fas fa-mobile-alt"></i> mobile
+          </div>
+          <div class="platform-chip" id="platform-web">
+            <i class="fas fa-globe"></i> web
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="kv-block" id="kv-block" style="display:none">
+          <div class="kv-label">kv store</div>
+          <div class="kv-pairs" id="kv-pairs"></div>
+        </div>
       </div>
-      <p id="song-progress">0:00 / 0:00</p>
+    </div>
+
+    <div class="right-col">
+      <div class="card spotify-card" id="spotify-card">
+        <div class="card-inner">
+          <div class="section-label" id="spotify-label">spotify</div>
+          <div id="spotify-content">
+            <div class="no-spotify">
+              <i class="fab fa-spotify"></i>
+              <span>not listening to anything</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card activities-card" id="activities-card">
+        <div class="card-inner">
+          <div class="section-label">activities</div>
+          <div id="activities-content">
+            <div class="no-activity">no active games</div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
+</div>
 
-  <script>
-    // Music Player Module
-    const MusicPlayer = (() => {
-      const playlist = [
-        {
-          title: "Wonder If U Care - flyingfish",
-          url: "https://github.com/exophs/Status/raw/refs/heads/main/music/status_wonder_if_u_care.mp3"
-        },
-        {
-          title: "Twin Flames - Midrift",
-          url: "https://github.com/exophs/Status/raw/refs/heads/main/music/Twin_Flames.mp3"
-        },
-        {
-          title: "Think Of Me Once In A While - Take Care",
-          url: "https://github.com/exophs/Status/raw/refs/heads/main/music/Take_Care-Think_Of_Me_Once_In_A_While.mp3"
-        },
-        {
-          title: "unrequited - Midrift",
-          url: "https://github.com/exophs/Status/raw/refs/heads/main/music/unrequited.mp3"
-        },
-        {
-          title: "wish I didnt kno her ##biblemusic - snor, d3r",
-          url: "https://github.com/exophs/Status/raw/refs/heads/main/music/wish_I_didnt_kno_her-%23%23biblemusic.mp3"
-        },
-        {
-          title: "Kiss Me Again - Nightcore Mix - Roy Bee",
-          url: "https://github.com/exophs/Status/raw/refs/heads/main/music/ROY_BEE-Kiss_Me_Again_(Nightcore-Official-Mix).mp3"
-        },
-        {
-          title: "The Perfect Girl - Mareux",
-          url: "https://github.com/exophs/Status/raw/refs/heads/main/music/Mareux-The_Perfect_Girl_(Audio).mp3"
-        }
-      ];
+<div class="music-bar" id="music-bar">
+  <div class="music-controls">
+    <button class="music-btn" id="prev-btn" title="Previous"><i class="fas fa-backward-step"></i></button>
+    <button class="music-btn" id="play-btn" title="Play"><i class="fas fa-play"></i></button>
+    <button class="music-btn" id="next-btn" title="Next"><i class="fas fa-forward-step"></i></button>
+  </div>
+  <span id="music-track" class="music-bar-track">—</span>
+  <input type="range" class="vol-slider" id="vol-slider" min="0" max="1" step="0.01" value="0.4" />
+</div>
 
-      const backgroundMusic = document.getElementById("background-music");
-      const soundButton = document.getElementById("sound-button");
-      const volumeSlider = document.getElementById("volume-slider");
-      const nowPlayingElement = document.getElementById("now-playing");
-      const nowPlayingText = document.getElementById("now-playing-text");
+<audio id="audio"></audio>
 
-      let isPlaying = false;
-      let currentTrackIndex = 0;
+<script>
+(function() {
+  const canvas = document.getElementById('bg');
+  const ctx = canvas.getContext('2d');
+  let W, H, stars = [];
 
-      // Initialize music player
-      const init = () => {
-        backgroundMusic.volume = volumeSlider.value;
-        shufflePlaylist();
-        loadTrack(currentTrackIndex);
-        setupEventListeners();
-      };
+  function resize() {
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
 
-      // Shuffle playlist
-      const shufflePlaylist = () => {
-        for (let i = playlist.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [playlist[i], playlist[j]] = [playlist[j], playlist[i]];
-        }
-      };
+  function initStars() {
+    stars = [];
+    for (let i = 0; i < 140; i++) {
+      stars.push({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        r: Math.random() * 1.2 + 0.2,
+        a: Math.random(),
+        s: Math.random() * 0.003 + 0.001
+      });
+    }
+  }
 
-      // Load a track
-      const loadTrack = (index) => {
-        const track = playlist[index];
-        backgroundMusic.src = track.url;
-        nowPlayingText.textContent = track.title;
-        
-        if (isPlaying) {
-          backgroundMusic.play().catch(error => {
-            console.error("Error playing audio:", error);
-          });
-        }
-      };
-
-      // Play next track
-      const playNextTrack = () => {
-        currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
-        loadTrack(currentTrackIndex);
-      };
-
-      // Toggle play/pause
-      const toggleMusic = () => {
-        if (isPlaying) {
-          backgroundMusic.pause();
-          soundButton.innerHTML = '<i class="fas fa-volume-mute"></i>';
-          nowPlayingElement.style.opacity = '0.3';
-        } else {
-          backgroundMusic.play()
-            .then(() => {
-              soundButton.innerHTML = '<i class="fas fa-volume-up"></i>';
-              nowPlayingElement.style.display = 'block';
-              nowPlayingElement.style.opacity = '0.7';
-            })
-            .catch((error) => {
-              console.error("Error playing audio:", error);
-              alert("Click anywhere on the page to enable audio playback.");
-            });
-        }
-        isPlaying = !isPlaying;
-      };
-
-      // Setup event listeners
-      const setupEventListeners = () => {
-        backgroundMusic.addEventListener('play', () => {
-          nowPlayingElement.style.display = 'block';
-          setTimeout(() => {
-            nowPlayingElement.style.opacity = '0.7';
-          }, 3000);
-        });
-
-        backgroundMusic.addEventListener('ended', playNextTrack);
-
-        volumeSlider.addEventListener("input", (e) => {
-          backgroundMusic.volume = e.target.value;
-          updateVolumeIcon(e.target.value);
-        });
-
-        soundButton.addEventListener("click", toggleMusic);
-      };
-
-      // Update volume icon based on volume level
-      const updateVolumeIcon = (volume) => {
-        if (volume == 0) {
-          soundButton.innerHTML = '<i class="fas fa-volume-mute"></i>';
-        } else if (volume < 0.5) {
-          soundButton.innerHTML = '<i class="fas fa-volume-down"></i>';
-        } else {
-          soundButton.innerHTML = '<i class="fas fa-volume-up"></i>';
-        }
-      };
-
-      return {
-        init
-      };
-    })();
-
-    // Discord Status Module
-    const DiscordStatus = (() => {
-      const DISCORD_USER_ID = "494913490419449857";
-      
-      let socket = null;
-      let progressAnimationFrame = null;
-      let isTabVisible = true;
-
-      // Initialize Discord status
-      const init = () => {
-        loadLastPresence();
-        connectWebSocket();
-        setupVisibilityListener();
-      };
-
-      // Connect to WebSocket
-      const connectWebSocket = () => {
-        if (socket && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)) {
-          return;
-        }
-
-        socket = new WebSocket("wss://api.lanyard.rest/socket");
-
-        socket.addEventListener("open", () => {
-          socket.send(
-            JSON.stringify({
-              op: 2,
-              d: {
-                subscribe_to_id: DISCORD_USER_ID,
-              },
-            })
-          );
-
-          if (!localStorage.getItem("lastPresence")) {
-            document.getElementById("discord-status").innerText = "Loading Discord status...";
-            document.getElementById("custom-status").innerText = "Loading custom status...";
-            document.getElementById("song-link").innerText = "Loading song...";
-          }
-        });
-
-        socket.addEventListener("message", (event) => {
-          const data = JSON.parse(event.data);
-
-          if (data.t === "INIT_STATE" || data.t === "PRESENCE_UPDATE") {
-            const presence = data.d;
-            updatePresenceUI(presence);
-            localStorage.setItem("lastPresence", JSON.stringify(presence));
-          }
-        });
-
-        socket.addEventListener("close", () => {
-          if (isTabVisible) {
-            updateStatusText("Connection closed. Reconnecting...");
-          }
-          setTimeout(connectWebSocket, 5000);
-        });
-
-        socket.addEventListener("error", (error) => {
-          if (isTabVisible) {
-            updateStatusText("Connection error. Reconnecting...");
-          }
-          setTimeout(connectWebSocket, 5000);
-        });
-      };
-
-      // Update status text
-      const updateStatusText = (message) => {
-        document.getElementById("discord-status").innerText = message;
-        document.getElementById("custom-status").innerText = message;
-        document.getElementById("song-link").innerText = message;
-      };
-
-      // Update presence UI
-      const updatePresenceUI = (presence) => {
-        if (!isTabVisible) return;
-
-        updateProfileInfo(presence);
-        updateStatusInfo(presence);
-        updateSpotifyStatus(presence);
-        updateActivities(presence);
-      };
-
-      // Update profile information
-      const updateProfileInfo = (presence) => {
-        const profilePicture = `https://cdn.discordapp.com/avatars/${DISCORD_USER_ID}/${presence.discord_user.avatar}.png?size=256`;
-        const displayName = presence.discord_user.global_name || presence.discord_user.username;
-        const username = presence.discord_user.username;
-
-        document.getElementById("profile-picture").src = profilePicture;
-        document.getElementById("display-name").innerHTML = `<strong>Display Name:</strong> ${displayName}`;
-        document.getElementById("username").innerHTML = `<strong>Username:</strong> ${username}`;
-      };
-
-      // Update status information
-      const updateStatusInfo = (presence) => {
-        const discordStatus = presence.discord_status;
-        document.getElementById("discord-status").innerHTML = `<strong>Status:</strong> ${discordStatus}`;
-
-        const customActivity = presence.activities.find((a) => a.type === 4);
-        if (customActivity) {
-          updateCustomStatus(customActivity);
-        } else {
-          document.getElementById("custom-status").innerHTML = "<strong>Custom Status:</strong> No custom status";
-        }
-      };
-
-      // Update custom status
-      const updateCustomStatus = (customActivity) => {
-        const customStatus = customActivity.state || "No custom status";
-        const customEmoji = customActivity.emoji;
-        let customStatusHTML = `<strong>Custom Status:</strong> ${customStatus}`;
-
-        if (customEmoji) {
-          const emojiURL = getEmojiURL(customEmoji);
-          if (emojiURL) {
-            customStatusHTML = `<strong>Custom Status:</strong> <img src="${emojiURL}" alt="${customEmoji.name}" class="custom-status-emoji"> ${customStatus}`;
-          } else {
-            customStatusHTML = `<strong>Custom Status:</strong> ${customEmoji.name} ${customStatus}`;
-          }
-        }
-
-        document.getElementById("custom-status").innerHTML = customStatusHTML;
-      };
-
-      // Update Spotify status
-      const updateSpotifyStatus = (presence) => {
-        const spotify = presence.spotify;
-        if (spotify) {
-          const albumCover = spotify.album_art_url;
-          const songName = spotify.song;
-          const artistName = spotify.artist;
-          const startTime = spotify.timestamps.start;
-          const endTime = spotify.timestamps.end;
-          const spotifyTrackId = spotify.track_id;
-
-          document.getElementById("album-cover").src = albumCover;
-          document.getElementById("song-link").innerText = `Now Playing: ${songName}`;
-          document.getElementById("artist-name").innerText = `Artist: ${artistName}`;
-          document.getElementById("song-link").href = `https://open.spotify.com/track/${spotifyTrackId}`;
-
-          document.getElementById("spotify-box").classList.remove("hidden");
-          updateProgress(startTime, endTime);
-        } else {
-          resetSpotifyStatus();
-        }
-      };
-
-      // Reset Spotify status
-      const resetSpotifyStatus = () => {
-        document.getElementById("song-link").innerText = "No song currently playing.";
-        document.getElementById("song-link").href = "#";
-        document.getElementById("artist-name").innerText = "";
-        document.getElementById("progress-bar-inner").style.width = "0%";
-        document.getElementById("song-progress").innerText = "0:00 / 0:00";
-
-        if (progressAnimationFrame) {
-          cancelAnimationFrame(progressAnimationFrame);
-          progressAnimationFrame = null;
-        }
-
-        document.getElementById("spotify-box").classList.add("hidden");
-      };
-
-      // Update progress bar
-      const updateProgress = (startTime, endTime) => {
-        if (!isTabVisible) {
-          if (progressAnimationFrame) {
-            cancelAnimationFrame(progressAnimationFrame);
-          }
-          return;
-        }
-
-        const currentTime = Date.now();
-        const progress = (currentTime - startTime) / (endTime - startTime);
-        const progressPercent = Math.min(progress * 100, 100);
-
-        document.getElementById("progress-bar-inner").style.width = `${progressPercent}%`;
-        document.getElementById("song-progress").innerText = `${formatTime(currentTime - startTime)} / ${formatTime(endTime - startTime)}`;
-
-        if (progressPercent < 100) {
-          progressAnimationFrame = requestAnimationFrame(() => updateProgress(startTime, endTime));
-        } else {
-          cancelAnimationFrame(progressAnimationFrame);
-        }
-      };
-
-      // Update activities
-      const updateActivities = (presence) => {
-        const activities = presence.activities.filter((a) => a.type === 0);
-        displayActivities(activities);
-      };
-
-      // Display activities
-      const displayActivities = (activities) => {
-        const activitiesContainer = document.getElementById("activities");
-        activitiesContainer.innerHTML = "";
-
-        activities.forEach((activity) => {
-          const activityElement = document.createElement("div");
-          activityElement.className = "activity";
-          activityElement.innerHTML = `
-            <strong>Playing:</strong> ${activity.name}<br>
-            ${activity.details ? `<em>${activity.details}</em><br>` : ""}
-            ${activity.state ? `<em>${activity.state}</em><br>` : ""}
-          `;
-          activitiesContainer.appendChild(activityElement);
-        });
-      };
-
-      // Get emoji URL
-      const getEmojiURL = (emoji) => {
-        if (emoji.id) {
-          return `https://cdn.discordapp.com/emojis/${emoji.id}.${emoji.animated ? "gif" : "png"}`;
-        }
-        return null;
-      };
-
-      // Format time
-      const formatTime = (ms) => {
-        const totalSeconds = Math.floor(ms / 1000);
-        const minutes = Math.floor(totalSeconds / 60);
-        const seconds = totalSeconds % 60;
-        return `${minutes}:${seconds.toString().padStart(2, "0")}`;
-      };
-
-      // Load last presence from localStorage
-      const loadLastPresence = () => {
-        const lastPresence = localStorage.getItem("lastPresence");
-        if (lastPresence) {
-          const presence = JSON.parse(lastPresence);
-          updatePresenceUI(presence);
-        }
-      };
-
-      // Setup visibility change listener
-      const setupVisibilityListener = () => {
-        document.addEventListener("visibilitychange", () => {
-          isTabVisible = !document.hidden;
-          
-          if (isTabVisible) {
-            loadLastPresence();
-            
-            if (!socket || socket.readyState === WebSocket.CLOSED || socket.readyState === WebSocket.CLOSING) {
-              connectWebSocket();
-            }
-            
-            const lastPresence = localStorage.getItem("lastPresence");
-            if (lastPresence) {
-              const presence = JSON.parse(lastPresence);
-              if (presence.spotify) {
-                updateProgress(presence.spotify.timestamps.start, presence.spotify.timestamps.end);
-              }
-            }
-          } else {
-            if (progressAnimationFrame) {
-              cancelAnimationFrame(progressAnimationFrame);
-            }
-          }
-        });
-      };
-
-      return {
-        init
-      };
-    })();
-
-    // Initialize the application
-    document.addEventListener('DOMContentLoaded', () => {
-      MusicPlayer.init();
-      DiscordStatus.init();
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    stars.forEach(s => {
+      s.a += s.s;
+      if (s.a > 1) s.s = -s.s;
+      if (s.a < 0) s.s = Math.abs(s.s);
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(180,175,255,${s.a * 0.7})`;
+      ctx.fill();
     });
-  </script>
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('resize', () => { resize(); initStars(); });
+  resize(); initStars(); draw();
+})();
+
+(function MusicPlayer() {
+  const playlist = [
+    { title: "Wonder If U Care — flyingfish", url: "https://github.com/exophs/Status/raw/refs/heads/main/music/status_wonder_if_u_care.mp3" },
+    { title: "Twin Flames — Midrift", url: "https://github.com/exophs/Status/raw/refs/heads/main/music/Twin_Flames.mp3" },
+    { title: "Think Of Me Once In A While — Take Care", url: "https://github.com/exophs/Status/raw/refs/heads/main/music/Take_Care-Think_Of_Me_Once_In_A_While.mp3" },
+    { title: "unrequited — Midrift", url: "https://github.com/exophs/Status/raw/refs/heads/main/music/unrequited.mp3" },
+    { title: "wish I didnt kno her — snor, d3r", url: "https://github.com/exophs/Status/raw/refs/heads/main/music/wish_I_didnt_kno_her-%23%23biblemusic.mp3" },
+    { title: "Kiss Me Again (Nightcore) — Roy Bee", url: "https://github.com/exophs/Status/raw/refs/heads/main/music/ROY_BEE-Kiss_Me_Again_(Nightcore-Official-Mix).mp3" },
+    { title: "The Perfect Girl — Mareux", url: "https://github.com/exophs/Status/raw/refs/heads/main/music/Mareux-The_Perfect_Girl_(Audio).mp3" }
+  ];
+
+  for (let i = playlist.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [playlist[i], playlist[j]] = [playlist[j], playlist[i]];
+  }
+
+  const audio = document.getElementById('audio');
+  const playBtn = document.getElementById('play-btn');
+  const prevBtn = document.getElementById('prev-btn');
+  const nextBtn = document.getElementById('next-btn');
+  const volSlider = document.getElementById('vol-slider');
+  const trackLabel = document.getElementById('music-track');
+
+  let idx = 0;
+  let playing = false;
+
+  function load(i) {
+    idx = (i + playlist.length) % playlist.length;
+    audio.src = playlist[idx].url;
+    trackLabel.textContent = playlist[idx].title;
+    if (playing) audio.play().catch(() => {});
+  }
+
+  function toggle() {
+    if (!playing) {
+      audio.play().then(() => {
+        playing = true;
+        playBtn.innerHTML = '<i class="fas fa-pause"></i>';
+        playBtn.classList.add('active');
+      }).catch(() => {});
+    } else {
+      audio.pause();
+      playing = false;
+      playBtn.innerHTML = '<i class="fas fa-play"></i>';
+      playBtn.classList.remove('active');
+    }
+  }
+
+  audio.addEventListener('ended', () => load(idx + 1));
+  playBtn.addEventListener('click', toggle);
+  prevBtn.addEventListener('click', () => load(idx - 1));
+  nextBtn.addEventListener('click', () => load(idx + 1));
+  volSlider.addEventListener('input', e => { audio.volume = e.target.value; });
+
+  audio.volume = volSlider.value;
+  load(0);
+})();
+
+(function DiscordStatus() {
+  const UID = "494913490419449857";
+  let socket = null;
+  let raf = null;
+  let reconnectTimer = null;
+  let isVisible = true;
+
+  const $ = id => document.getElementById(id);
+
+  function setConn(state) {
+    const badge = $('conn-badge');
+    const text = $('conn-text');
+    badge.className = 'conn-badge ' + state;
+    text.textContent = state === 'connected' ? 'live' : state;
+  }
+
+  function formatMs(ms) {
+    const s = Math.floor(ms / 1000);
+    const m = Math.floor(s / 60);
+    const h = Math.floor(m / 60);
+    if (h > 0) return `${h}:${String(m % 60).padStart(2,'0')}:${String(s % 60).padStart(2,'0')}`;
+    return `${m}:${String(s % 60).padStart(2,'0')}`;
+  }
+
+  function getActivityImageURL(activity, type) {
+    const assets = activity.assets;
+    if (!assets) return null;
+    const key = type === 'large' ? assets.large_image : assets.small_image;
+    if (!key) return null;
+    if (key.startsWith('mp:external/')) {
+      return 'https://media.discordapp.net/external/' + key.slice('mp:external/'.length);
+    }
+    if (activity.application_id) {
+      return `https://cdn.discordapp.com/app-assets/${activity.application_id}/${key}.png`;
+    }
+    return null;
+  }
+
+  function updatePresence(p) {
+    if (!isVisible) return;
+
+    const u = p.discord_user;
+    const avatarURL = `https://cdn.discordapp.com/avatars/${UID}/${u.avatar}.png?size=128`;
+    const avatarEl = $('avatar');
+    if (avatarEl.src !== avatarURL) avatarEl.src = avatarURL;
+
+    $('display-name').textContent = u.global_name || u.username;
+    $('username').textContent = '@' + u.username;
+
+    const dot = $('status-dot');
+    dot.className = 'status-dot ' + (p.discord_status || 'offline');
+
+    const customAct = p.activities.find(a => a.type === 4);
+    const csEl = $('custom-status');
+    if (customAct && (customAct.state || customAct.emoji)) {
+      let html = '';
+      if (customAct.emoji) {
+        if (customAct.emoji.id) {
+          const ext = customAct.emoji.animated ? 'gif' : 'png';
+          html += `<img src="https://cdn.discordapp.com/emojis/${customAct.emoji.id}.${ext}" alt="" />`;
+        } else {
+          html += customAct.emoji.name + ' ';
+        }
+      }
+      if (customAct.state) html += `<span>${customAct.state}</span>`;
+      csEl.innerHTML = html;
+    } else {
+      csEl.innerHTML = '<span>no status</span>';
+    }
+
+    ['desktop','mobile','web'].forEach(pl => {
+      const el = $('platform-' + pl);
+      el.classList.toggle('active', !!p['active_on_discord_' + pl]);
+    });
+
+    const kv = p.kv;
+    const kvBlock = $('kv-block');
+    const kvPairs = $('kv-pairs');
+    if (kv && Object.keys(kv).length > 0) {
+      kvPairs.innerHTML = '';
+      Object.entries(kv).forEach(([k, v]) => {
+        const row = document.createElement('div');
+        row.className = 'kv-pair';
+        row.innerHTML = `<span class="kv-key">${k}</span><span class="kv-val">${v}</span>`;
+        kvPairs.appendChild(row);
+      });
+      kvBlock.style.display = '';
+    } else {
+      kvBlock.style.display = 'none';
+    }
+
+    updateSpotify(p);
+    updateActivities(p);
+  }
+
+  function updateSpotify(p) {
+    const content = $('spotify-content');
+    const label = $('spotify-label');
+    if (raf) { cancelAnimationFrame(raf); raf = null; }
+
+    if (p.listening_to_spotify && p.spotify) {
+      const sp = p.spotify;
+      label.innerHTML = '<i class="fab fa-spotify" style="color:var(--spotify);margin-right:5px"></i>spotify';
+      content.innerHTML = `
+        <div class="spotify-top">
+          <img class="album-art" src="${sp.album_art_url}" alt="" />
+          <div class="spotify-meta">
+            <div class="spotify-tag"><i class="fas fa-music"></i> now playing</div>
+            <a class="song-title" href="https://open.spotify.com/track/${sp.track_id}" target="_blank" rel="noopener">${sp.song}</a>
+            <div class="artist-name">${sp.artist}</div>
+            <div class="album-name">${sp.album}</div>
+          </div>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-times">
+            <span id="sp-cur">0:00</span>
+            <span id="sp-end">${formatMs(sp.timestamps.end - sp.timestamps.start)}</span>
+          </div>
+          <div class="progress-track"><div class="progress-fill" id="sp-fill"></div></div>
+        </div>
+      `;
+      tickProgress(sp.timestamps.start, sp.timestamps.end);
+    } else {
+      label.textContent = 'spotify';
+      content.innerHTML = `<div class="no-spotify"><i class="fab fa-spotify"></i><span>not listening to anything</span></div>`;
+    }
+  }
+
+  function tickProgress(start, end) {
+    const now = Date.now();
+    const elapsed = now - start;
+    const total = end - start;
+    const pct = Math.min((elapsed / total) * 100, 100);
+
+    const fill = $('sp-fill');
+    const cur = $('sp-cur');
+    if (fill) fill.style.width = pct + '%';
+    if (cur) cur.textContent = formatMs(Math.min(elapsed, total));
+
+    if (pct < 100 && isVisible) raf = requestAnimationFrame(() => tickProgress(start, end));
+  }
+
+  function updateActivities(p) {
+    const acts = p.activities.filter(a => a.type === 0);
+    const container = $('activities-content');
+    if (acts.length === 0) {
+      container.innerHTML = '<div class="no-activity">no active games</div>';
+      return;
+    }
+
+    container.innerHTML = '';
+    acts.forEach(act => {
+      const largeImg = getActivityImageURL(act, 'large');
+      const smallImg = getActivityImageURL(act, 'small');
+
+      const elapsed = act.timestamps?.start
+        ? `<div class="activity-elapsed">${formatMs(Date.now() - act.timestamps.start)} elapsed</div>`
+        : '';
+
+      const imgHTML = largeImg
+        ? `<div class="activity-art-wrap">
+             <img class="activity-large-img" src="${largeImg}" alt="" title="${act.assets?.large_text || ''}" />
+             ${smallImg ? `<img class="activity-small-img" src="${smallImg}" alt="" title="${act.assets?.small_text || ''}" />` : ''}
+           </div>`
+        : '';
+
+      const el = document.createElement('div');
+      el.className = 'activity-item';
+      el.innerHTML = `
+        ${imgHTML}
+        <div class="activity-info">
+          <div class="activity-name">${act.name}</div>
+          ${act.details ? `<div class="activity-details">${act.details}</div>` : ''}
+          ${act.state ? `<div class="activity-state">${act.state}</div>` : ''}
+          ${elapsed}
+        </div>
+      `;
+      container.appendChild(el);
+    });
+  }
+
+  function connect() {
+    if (socket && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)) return;
+    setConn('reconnecting');
+    socket = new WebSocket('wss://api.lanyard.rest/socket');
+
+    socket.addEventListener('open', () => {
+      socket.send(JSON.stringify({ op: 2, d: { subscribe_to_id: UID } }));
+    });
+
+    socket.addEventListener('message', e => {
+      const msg = JSON.parse(e.data);
+      if (msg.op === 1) {
+        setConn('connected');
+      }
+      if (msg.t === 'INIT_STATE' || msg.t === 'PRESENCE_UPDATE') {
+        const p = msg.d;
+        updatePresence(p);
+        try { sessionStorage.setItem('lp', JSON.stringify(p)); } catch (_) {}
+      }
+    });
+
+    socket.addEventListener('close', () => {
+      setConn('reconnecting');
+      if (reconnectTimer) clearTimeout(reconnectTimer);
+      reconnectTimer = setTimeout(connect, 5000);
+    });
+
+    socket.addEventListener('error', () => {
+      setConn('reconnecting');
+      socket.close();
+    });
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    isVisible = !document.hidden;
+    if (isVisible) {
+      try {
+        const cached = sessionStorage.getItem('lp');
+        if (cached) updatePresence(JSON.parse(cached));
+      } catch (_) {}
+      connect();
+    } else {
+      if (raf) { cancelAnimationFrame(raf); raf = null; }
+    }
+  });
+
+  try {
+    const cached = sessionStorage.getItem('lp');
+    if (cached) updatePresence(JSON.parse(cached));
+  } catch (_) {}
+
+  connect();
+})();
+</script>
 </body>
 </html>
