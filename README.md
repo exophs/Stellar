@@ -2,7 +2,7 @@
 
 A real-time Discord status page that displays your online presence, custom status, and Spotify activity with a stunning animated space background and music player.
 
-![Preview](https://imgur.com/phXdzyF)
+![Preview](https://i.imgur.com/phXdzyF.png)
 
 ## Features
 
